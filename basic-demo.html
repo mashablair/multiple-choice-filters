@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<!--<![endif]-->
+
+<head>
+	<title>Demo</title>
+	<meta name="referrer" content="always" />
+	<meta name="robots" content="all" />
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="https://cdngeneral.rcqatol.com/css/bootstrap-combined.min.1566468096.css" />
+	<link rel="stylesheet" type="text/css" href="rental.css" />
+
+	<style>
+		#cards {
+			display: flex;
+			margin-top: 200px;
+		}
+
+		.card {
+			border: 1px solid;
+			width: 150px;
+			margin-bottom: 15px;
+			margin-right: 15px;
+			padding: 10px
+		}
+	</style>
+</head>
+
+<body>
+
+
+
+	<!-- Unit List and Filters -->
+	<div class="container" id="units-list">
+
+		<div class="row browse-unit-section" id="filters">
+
+			<div class="col-lg-12">
+				<h2>Browse Units</h2>
+			</div>
+
+			<!-- FILTERS  -->
+			<!-- Filter by Date -->
+			<div class="filter-date col-lg-4 col-sm-6">
+				<div class="unit-form-group col-lg-2 col-sm-8">
+					<label>Checkin Date</label>
+					<div class="form-box">
+						<input id="FtxtMoveInDate" autocomplete="xoff" name="FtxtMoveInDate" type="text" title="Select a Move-In date for more accurate pricing and availability." class="required maskdate excludeDays input-small isdate hasDatepicker input-text date-pickers" value="" placeholder="Select Date" data-filter-name="date_available" data-compare=">" value="">
+					</div>
+				</div>
+			</div>
+
+			<div class="col-lg-4 col-sm-8">
+				<div class="row">
+
+					<!-- Filter by Guest -->
+					<div class="col-sm-4">
+						<div class="unit-form-group">
+							<label>Guests</label>
+							<div class="form-box">
+								<div class="dropdown dropdown-custom">
+									<button class="dropdown-toggle" type="button" id="menu1" data-toggle="dropdown"> Guest
+										<span class="caret"></span></button>
+									<ul id="guest_filter" class="dropdown-menu w-210" role="menu" aria-labelledby="menu1" data-guests="1">
+										<li>
+											<div class="row mb-10">
+												<div class="col-sm-4">
+													<span> Guests</span>
+												</div>
+												<div class="col-sm-8">
+													<div class="count-container">
+														<div class="remove">
+															<button class="btn btn-outline-secondary" type="button"> - </button>
+														</div>
+														<input type="number" name="filter-guests" id="guest_filter_num" class="count filter" value="1" min="0" data-filter-name="guests" data-compare=">" value="1">
+														<div class="add">
+															<button class="btn btn-outline-secondary" type="button"> + </button>
+														</div>
+													</div>
+												</div>
+											</div>
+										</li>
+										<li>
+											<div class="w-100 mt-20">
+												<button class="btn btn-link pull-left filter-close">Close</button>
+											</div>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Filter by Bed -->
+					<div class="col-sm-4">
+						<div class="unit-form-group">
+							<label>Bedrooms</label>
+							<div class="form-box">
+								<div class="dropdown dropdown-custom">
+									<button class="dropdown-toggle " type="button" id="menu1" data-toggle="dropdown"> Any
+										<span class="caret"></span></button>
+									<ul class="dropdown-menu" role="menu" aria-labelledby="menu1" id="beds_filter">
+										<!-- 										<li>
+												<label class="custom-checkbox checkbox-container">Any
+													<input type="checkbox" id="beds_default">
+													<span class="checkmark"></span>
+												</label>
+											</li> -->
+										<li>
+											<label class="custom-checkbox checkbox-container">Studio
+												<input type="checkbox" checked="checked" class="filter beds-filter" data-filter-name="beds" data-compare="contains" value="0" data-value=''>
+												<span class="checkmark"></span>
+											</label>
+										</li>
+										<li>
+											<label class="custom-checkbox checkbox-container">1 Bed
+												<input type="checkbox" checked="checked" class="filter beds-filter" data-filter-name="beds" data-compare="contains" value="1" data-value=''>
+												<span class="checkmark"></span>
+											</label>
+										</li>
+										<li>
+											<label class="custom-checkbox checkbox-container">2 Bed
+												<input type="checkbox" checked="checked" class="filter beds-filter" data-filter-name="beds" data-compare="contains" value="2" data-value=''>
+												<span class="checkmark"></span>
+											</label>
+										</li>
+										<li>
+											<label class="custom-checkbox checkbox-container">3 Bed
+												<input type="checkbox" checked="checked" class="filter beds-filter" data-filter-name="beds" data-compare="contains" value="3" data-value=''>
+												<span class="checkmark"></span>
+											</label>
+										</li>
+										<li>
+											<div class="w-100 mt-20">
+												<button class="btn btn-link pull-left filter-close">Close</button>
+											</div>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- CARDS -->
+		<div class="row property-list-section" id="cards">
+			<!-- Cards are dynamically inserted here -->
+		</div>
+	</div>
+
+
+
+
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js" type="text/javascript"></script>
+	<script src="main.js"></script>
+
+
+	<script>
+		$(document).ready(function () {
+
+			// take inline JS out of input fields
+			$(".date-pickers").on('change', function () {
+				console.log(this);
+				datemask(this);
+				if (!IsValidDate(this.value)) {
+					this.value = '';
+				}
+			});
+
+			// format the date string
+			function datestringreplace(fullString, text, by) {
+				console.log("datestringreplace is called");
+				var strLength = fullString.length,
+					txtLength = text.length;
+				if ((strLength == 0) || (txtLength == 0)) return fullString;
+				var i = fullString.indexOf(text);
+				if ((!i) && (text != fullString.substring(0, txtLength))) return fullString;
+				if (i == -1) return fullString;
+				var newstr = fullString.substring(0, i) + by;
+				if (i + txtLength < strLength) newstr += datestringreplace(fullString.substring(i + txtLength, strLength), text, by);
+				return newstr;
+			}
+
+			// formats the date string
+			function datemask(mydate) {
+				console.log('datemask is called')
+				var mm = '';
+				var dd = '';
+				var yy = '';
+				var mmLength = 0;
+				var ismasked = mydate.value.indexOf('/');
+				if (ismasked >= 0) {
+					var month1digitarr = mydate.value.split('/');
+					if (month1digitarr[1].length == 1) {
+						mmLength = 1;
+					}
+				}
+				mydate.value = datestringreplace(mydate.value, '/', '');
+				var dtlen = mydate.value.length;
+				if (dtlen == 0) {
+					return true;
+				}
+				if (dtlen == 4) {
+					mydate.value = '0' + mydate.value.substring(0, 1) + '0' + mydate.value.substring(1);
+				}
+				if (dtlen == 6) {
+					yy = mydate.value.substring(2, 4);
+					if (yy == '19' || yy == '20') {
+						mydate.value = '0' + mydate.value.substring(0, 1) + '0' + mydate.value.substring(1);
+					}
+				}
+				if (dtlen == 7) {
+					if (mmLength == 1) {
+						mydate.value = mydate.value.substring(0, 2) + '0' + mydate.value.substring(2);
+					} else {
+						mydate.value = '0' + mydate.value;
+					}
+				}
+				if (dtlen == 9) {
+					mydate.value = '0' + mydate.value;
+				}
+				mm = mydate.value.substring(0, 2);
+				dd = mydate.value.substring(2, 4);
+				yy = mydate.value.substring(4);
+				if (yy.length == 2) {
+					if (yy < 50) {
+						yy = '20' + yy;
+					} else {
+						yy = '19' + yy;
+					}
+				}
+				mydate.value = mm + '/' + dd + '/' + yy;
+				console.log("mydate.value is " + mydate.value);
+				return true;
+			}
+
+			// validates the date based on input string
+			function IsValidDate(value) {
+				console.log("IsValidDate is called");
+				if (value == 'Move In Date' || value == '') {
+					return true;
+				}
+				var enteredDate = Globalize.parseDate(value, '', 'en-US');
+				if (isNaN(enteredDate)) {
+					$.showMessage({
+						'type': 'warning',
+						'text': 'Please enter a valid date.'
+					});
+					return false;
+				}
+				var startDate = Globalize.parseDate('8/22/2019', '', 'en-US');
+				if (startDate > enteredDate) {
+					alert('Date can not be in the past');
+					return false;
+				}
+				return true;
+			}
+		});
+	</script>
+
+
+
+</body>
+
+</html>
