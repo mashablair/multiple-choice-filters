@@ -2,10 +2,8 @@
 var filterCards = (function() {
   //"use strict";
 
-  var bedsFilter = document.getElementById("beds_filter");
-
   // Get all filters
-  var filters = Array.from(document.querySelectorAll("#filters [data-filter-name]"));
+  var filters = Array.from(document.querySelectorAll("#filters .filter"));
   console.log("FILTERS");
   console.log(filters);
 
@@ -16,94 +14,66 @@ var filterCards = (function() {
       console.log("filter is clicked");
       console.log(event.target);
 
-      if (!event.target.matches(".filter")) return;
+      // if (!event.target.matches(".filter")) return;
 
       runFilters();
     },
     false
   );
 
+  /** Checks multiple-choice checkboxes filters, then checks all other filters,
+   *  combines the result and creates criteriaArray.
+   *  Passes this array to findMatches(criteriaArray).
+   *  Passes the result of filtered units array into renderCard() function
+   */
   function runFilters() {
-    // handle multiple-choice filters separately
-    // create criteria1
-    // then criteria2
-    // then combine them into final criteria
-
-    // handle beds filter
+    // handle MULTIPLE-CHOICE beds filter first
     var activeBeds = [];
-    // loop through every input checkbox and create values array for all checked boxes
-    var allBedsInputs = document.querySelectorAll("#beds_filter .filter");
+    // loop through every checkbox and create values array for all checked boxes
+    var allBedsInputs = document.querySelectorAll("#beds_filter .beds-filter");
     Array.prototype.forEach.call(allBedsInputs, function(elem, i) {
       if (elem.checked) {
         activeBeds.push(parseInt(elem.value));
       }
     });
-    console.log(activeBeds);
-    // // then update data-value's value with this array
-    // Array.prototype.forEach.call(allBedsInputs, function(elem, i) {
-    //   if (elem.checked) {
-    //     elem.setAttribute('data-value', activeBeds);
-    //   }
-    // });
 
-    // bedsFilter.setAttribute('data-beds-value', activeBeds); // "0,2,3"
-
+    // add this array of values in beds criteria object
     var criteriaBeds = { name: "beds", compare: "contains", val: activeBeds };
-    console.log(criteriaBeds);
 
-    console.log("FILTERS");
-    console.log(filters);
+    // Then loop through the rest of single-value filters to create an array of criteria objects
+    var criteriaArray = filters.map(function(filter) {
+      return {
+        name: filter.getAttribute("data-filter-name"),
+        compare: filter.getAttribute("data-compare"),
+        val: filter.getAttribute("data-value") ? filter.getAttribute("data-value") : filter.value
+      };
+    });
 
-    // Create an array of criteria from looping thru all filters
-    var criteria = filters
-      // first, filter criteria and only keep active filters
-      .filter(function(filter) {
-        return (filter.type === "checkbox" && filter.checked) || filter.type === "number" || filter.type === "text";
-      })
-      // then create an array of filters criteria
-      .map(function(filter) {
-        return {
-          name: filter.getAttribute("data-filter-name"),
-          compare: filter.getAttribute("data-compare"),
-          val: filter.getAttribute("data-value") ? filter.getAttribute("data-value") : filter.value
-        };
-      });
+    // combine the result to create a final criteria array
+    criteriaArray.push(criteriaBeds);
 
-    console.log("criteria: ");
-    console.log(criteria);
+    console.log("Final CRITERIA:");
+    console.log(criteriaArray);
 
-    // // clean the array to remove all duplicates
-    // var filteredCriteria = criteria.filter((thing, index, self) =>
-    //   index === self.findIndex((t) => (
-    //     t.name === thing.name
-    //   ))
-    // )
+    // Get an array of filtered units
+    var filteredUnitsArray = findMatches(criteriaArray);
+    console.log(filteredUnitsArray);
 
-    console.log("FILTERED CRITERIA");
-    console.log(filteredCriteria);
-
-    // Get matches
-    var matches = findMatches(filteredCriteria);
-    console.log(matches);
-
-    // render cards from main.js:
-    renderCards(matches);
+    // render cards by using the array of filtered units:
+    renderCards(filteredUnitsArray);
   }
 
   // Returns Array of filteredMatches
   var findMatches = function(criteria) {
     console.log("findMatches function is called");
 
+    // Loop through every unit
     // We want to return true if the unit matches the criteria, and false if it does not
     // This will create a new array containing only the items that returned true
     return allUnits.units.filter(function(unit) {
-      console.log(unit);
-
       // Check if unit satisfies all criteria
-      // We'll again use the filter() method to get back an array of matching criteria
-      var unitDetails = criteria.filter(function(condition) {
-        console.log(condition);
-
+      // loops through every criteria for this unit to get back an array of matching criteria
+      var matchingCriteriaArray = criteria.filter(function(condition) {
         // Depending on the comparison required, we'll check if the unit matches in a few different ways
         if (condition.compare === "<") {
           return unit[condition.name] < condition.val;
@@ -112,24 +82,20 @@ var filterCards = (function() {
         } else if (condition.compare === "=") {
           return unit[condition.name] == condition.val;
         } else if (condition.compare === "contains") {
-          // turn condition.value string into array
-          console.log("############################");
-          var valuesArray = condition.val.split(",");
-          console.log(unit[condition.name]);
-          console.log(valuesArray.includes(unit[condition.name].toString()));
-          return valuesArray.includes(unit[condition.name].toString());
+          // check if unit's 'beds' value exists in criteria array of beds values e.g. val: [0, 2, 3]
+          return condition.val.includes(unit[condition.name]);
         } else {
           return false;
         }
       });
 
-      console.log(unitDetails);
+      console.log(matchingCriteriaArray); // e.g. [{...}, {...}]
 
-      // Compare the matching unitDetails length to the criteria length
+      // Compare the matching matchingCriteriaArray length to the criteria length
       // If they're the same, the unit matches all criteria
       // If not, it fails
-      console.log(unitDetails.length === criteria.length);
-      return unitDetails.length === criteria.length;
+      console.log(matchingCriteriaArray.length === criteria.length);
+      return matchingCriteriaArray.length === criteria.length;
     });
   };
 

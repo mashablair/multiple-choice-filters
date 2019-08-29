@@ -1,10 +1,8 @@
 <!doctype html>
 <html lang="en">
-<!--<![endif]-->
 
 <head>
 	<title>Demo</title>
-	<meta name="referrer" content="always" />
 	<meta name="robots" content="all" />
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,7 +44,7 @@
 				<div class="unit-form-group col-lg-2 col-sm-8">
 					<label>Checkin Date</label>
 					<div class="form-box">
-						<input id="FtxtMoveInDate" autocomplete="xoff" name="FtxtMoveInDate" type="text" title="Select a Move-In date for more accurate pricing and availability." class="required maskdate excludeDays input-small isdate hasDatepicker input-text date-pickers" value="" placeholder="Select Date" data-filter-name="date_available" data-compare=">" value="">
+						<input id="FtxtMoveInDate" autocomplete="xoff" name="FtxtMoveInDate" type="text" title="Select a Move-In date for more accurate pricing and availability." class="required maskdate excludeDays input-small isdate hasDatepicker input-text date-pickers filter" value="" placeholder="Select Date" data-filter-name="date_available" data-compare=">" value="">
 					</div>
 				</div>
 			</div>
@@ -66,7 +64,7 @@
 										<li>
 											<div class="row mb-10">
 												<div class="col-sm-4">
-													<span> Guests</span>
+													<span> Guests <span class="text-light text-sm">(3+)</span></span>
 												</div>
 												<div class="col-sm-8">
 													<div class="count-container">
@@ -84,6 +82,7 @@
 										<li>
 											<div class="w-100 mt-20">
 												<button class="btn btn-link pull-left filter-close">Close</button>
+												<button class="btn btn-link pull-right">Update</button>
 											</div>
 										</li>
 									</ul>
@@ -109,31 +108,32 @@
 											</li> -->
 										<li>
 											<label class="custom-checkbox checkbox-container">Studio
-												<input type="checkbox" checked="checked" class="filter beds-filter" data-filter-name="beds" data-compare="contains" value="0" data-value=''>
+												<input type="checkbox" checked="checked" class="beds-filter" data-filter-name="beds" data-compare="contains" value="0">
 												<span class="checkmark"></span>
 											</label>
 										</li>
 										<li>
 											<label class="custom-checkbox checkbox-container">1 Bed
-												<input type="checkbox" checked="checked" class="filter beds-filter" data-filter-name="beds" data-compare="contains" value="1" data-value=''>
+												<input type="checkbox" checked="checked" class="beds-filter" data-filter-name="beds" data-compare="contains" value="1">
 												<span class="checkmark"></span>
 											</label>
 										</li>
 										<li>
 											<label class="custom-checkbox checkbox-container">2 Bed
-												<input type="checkbox" checked="checked" class="filter beds-filter" data-filter-name="beds" data-compare="contains" value="2" data-value=''>
+												<input type="checkbox" checked="checked" class="beds-filter" data-filter-name="beds" data-compare="contains" value="2">
 												<span class="checkmark"></span>
 											</label>
 										</li>
 										<li>
 											<label class="custom-checkbox checkbox-container">3 Bed
-												<input type="checkbox" checked="checked" class="filter beds-filter" data-filter-name="beds" data-compare="contains" value="3" data-value=''>
+												<input type="checkbox" checked="checked" class="beds-filter" data-filter-name="beds" data-compare="contains" value="3">
 												<span class="checkmark"></span>
 											</label>
 										</li>
 										<li>
 											<div class="w-100 mt-20">
 												<button class="btn btn-link pull-left filter-close">Close</button>
+												<button class="btn btn-link pull-right">Update</button>
 											</div>
 										</li>
 									</ul>
