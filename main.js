@@ -2,42 +2,170 @@
 var filterCards = (function() {
   //"use strict";
 
+  var guestFilter = document.getElementById("guest_filter"),
+    guestFilterInput = document.getElementById("guest_filter_num"),
+    guestLabel = document.getElementById("guest_label");
+
   // Get all filters
   var filters = Array.from(document.querySelectorAll("#filters .filter"));
   console.log("FILTERS:");
   console.log(filters);
 
-  // Listen for changes to any filter
-  document.querySelector("#filters").addEventListener(
-    "input",
-    function(event) {
-      // if date input field, return b/c we want to wait for 'blur' event
-      if (event.target.matches(".date-pickers")) return;
+  /** EVENT LISTENERS */
 
-      console.log("filter is clicked");
-      console.log(event.target);
-      runFilters();
-    },
-    false
-  );
+  // Since all filters behave slightly differently, we won't have a single event listener
+  // but all event listeners will call runFilters(), if conditions are passed
 
   // CheckIn Date filter event listener (wait until date is finalized)
   document.querySelector("#FtxtMoveInDate").addEventListener(
     "blur",
     function(event) {
-      console.log("date input filed is clicked");
+      console.log("CheckIn Date filter (blur) is activated");
       console.log(event.target);
 
-      // if date input field, return b/c we want to wait for 'blur' event
-      if (!event.target.matches("#FtxtMoveInDate")) return;
-
+      // if input is invalid, return
       if (event.target.value === "" || !event.target.value) return;
-      // var filterDate = new Date(event.target.value).getTime();
-      // event.target.setAttribute('data-value', filterDate)
+
       runFilters();
     },
     false
   );
+
+  // Guest filter event listener for input
+  guestFilter.addEventListener(
+    "input",
+    function(event) {
+      console.log("Guest filter input is activated");
+      console.log(event.target);
+      runFilters();
+    },
+    false
+  );
+
+  // Guest filter event listener for buttons
+  guestFilter.addEventListener(
+    "click",
+    function(e) {
+      console.log("Guest filter button is clicked");
+      console.log(event.target);
+
+      // to prevent dropdowns from closing on button clicks
+      e.stopPropagation();
+
+      // sanity check if not a button was clicked
+      if (!event.target.matches("button")) return;
+
+      // depending what button is clicked
+      // if Done btn, just close & return
+      if (event.target.classList.contains("filter-close")) {
+        this.parentNode.classList.remove("open");
+
+        // if any btns that require filters running
+      } else {
+        var guestNum = parseInt(guestFilterInput.value);
+
+        // if Minus btn
+        if (event.target.classList.contains("decrement-btn")) {
+          console.log("Minus btn is clicked");
+          if (isNaN(guestNum)) {
+            guestNum = 2;
+          }
+          if (guestNum > 1) {
+            guestNum -= 1;
+            guestFilterInput.value = guestNum;
+          }
+
+          // if Plus btn
+        } else if (event.target.classList.contains("increment-btn")) {
+          console.log("Plus btn is clicked");
+          if (isNaN(guestNum)) {
+            guestNum = 0;
+          }
+
+          guestNum += 1;
+          guestFilterInput.value = guestNum;
+
+          // if Clear btn, reset input to 1 (default)
+        } else if (event.target.classList.contains("filter-clear")) {
+          guestFilterInput.value = 1;
+        }
+
+        // update label & run filters
+        guestLabel.textContent = `Guests (${guestNum})`;
+        runFilters();
+      }
+    },
+    false
+  );
+
+  // Guest filter: if user is trying to copy/paste value into input, set value to 1
+  guestFilterInput.onpaste = function(e) {
+    console.log("user tries to paste value in Guest input");
+    guestFilter.value = 1;
+    e.preventDefault();
+  };
+
+  // Bedroom filters (checkboxes) event listener
+  document.querySelector("#beds_filter").addEventListener(
+    "input",
+    function(event) {
+      console.log("Bedrooms filter is clicked");
+      console.log(event.target);
+      runFilters();
+    },
+    false
+  );
+
+  // // Bedroom filters event listener for buttons
+  // guestFilter.addEventListener(
+  //   "click",
+  //   function() {
+  //     console.log("Guest filter button is clicked");
+
+  //     console.log(event.target);
+
+  //     // sanity check if not a button was clicked
+  //     if (!event.target.matches("button")) return;
+
+  //     var guestNum = parseInt(guestFilterInput.value);
+
+  //     // depending what button is clicked
+  //     // if Done btn, just close & return
+  //     if (event.target.classList.contains("filter-close")) {
+  //       this.parentNode.classList.remove("open");
+  //     }
+
+  //     // if Minus btn
+  //     else if (event.target.classList.contains("decrement-btn")) {
+  //       console.log("Minus btn is clicked");
+  //       if (isNaN(guestNum)) {
+  //         guestNum = 2;
+  //       }
+  //       if (guestNum > 1) {
+  //         guestNum -= 1;
+  //         guestFilterInput.value = guestNum;
+  //       }
+  //       runFilters();
+
+  //       // if Plus btn
+  //     } else if (event.target.classList.contains("increment-btn")) {
+  //       console.log("Plus btn is clicked");
+  //       if (isNaN(guestNum)) {
+  //         guestNum = 0;
+  //       }
+
+  //       guestNum += 1;
+  //       guestFilterInput.value = guestNum;
+  //       runFilters();
+
+  //       // if Clear btn, reset input to 1 (default)
+  //     } else if (event.target.classList.contains("filter-clear")) {
+  //       guestFilterInput.value = 1;
+  //       runFilters();
+  //     }
+  //   },
+  //   false
+  // );
 
   /** Checks multiple-choice checkboxes filters, then checks all other filters,
    *  combines the result and creates criteriaArray.
@@ -130,66 +258,46 @@ var filterCards = (function() {
       return matchingCriteriaArray.length === criteria.length;
     });
   };
-
-  // **********************
-  // unrelated filters code
-  var guestFilter = $("#guest_filter"),
-    guestFilterInput = document.getElementById("guest_filter_num"),
-    closeFilter = $(".filter-close");
-
-  $(document).ready(function() {
-    // to prevent dropdowns from closing on button clicks
-    $(".dropdown-menu").click(function(e) {
-      e.stopPropagation();
-    });
-
-    guestFilterInput.onpaste = function(e) {
-      guestFilter.value = 1;
-      e.preventDefault();
-    };
-
-    renderCards(allUnits.units);
-  });
-
-  // Minus button on Guest filter
-  guestFilter.find(".remove > button").on("click", function() {
-    console.log("Guest filter 'minus' button is clicked");
-    var guestNum = parseInt(guestFilterInput.value);
-    if (isNaN(guestNum)) {
-      guestNum = 2;
-    }
-    if (guestNum > 1) {
-      guestNum -= 1;
-      guestFilterInput.value = guestNum;
-    }
-
-    runFilters();
-  });
-
-  // Plus button on Guest filter
-  guestFilter.find(".add > button").on("click", function() {
-    console.log("Guest filter 'plus' button is clicked");
-    var guestNum = parseInt(guestFilterInput.value);
-    if (isNaN(guestNum)) {
-      guestNum = 0;
-    }
-
-    guestNum += 1;
-    guestFilterInput.value = guestNum;
-
-    runFilters();
-  });
-
-  // Cancel button
-  closeFilter.on("click", function() {
-    console.log("dropdown cancel is clicked");
-    $(this)
-      .closest(".dropdown")
-      .removeClass("open");
-
-    console.log(renderCards.allUnitsArray.units);
-  });
 })();
+
+// Some other unrelated filters code:
+// init
+$(document).ready(function() {
+  renderCards(allUnits.units);
+});
+
+/**
+ * Builds cards based on units data in filtered allUnits array
+ * @param  {Array}  data The data array or JSON file
+ */
+function renderCards(data) {
+  console.log("building and displaying cards");
+
+  var cards = $("#cards");
+
+  // first, delete all cards from the container
+  cards.empty();
+
+  // if there are no units in filtered allUnits array, display the message
+  if (data.length === 0) {
+    cards.append("<p>There are no apartments matching your search.</p>");
+  }
+
+  // Otherwise, display the cards based on filter values
+  else {
+    // Loop through each item in filtered allUnits array (our data) and create a card for each unit
+    data.forEach(function(unitData, unit) {
+      // for each item in filtered allUnits data, create a card string and fill out the info w/ data details
+      var card = `<div class="card">Card<br>
+                    Bedrooms: ${unitData.beds} <br>
+                    Guests: ${unitData.guests} <br>
+                    Checkin Date: ${unitData.date_available}</div>`;
+
+      // append a card to the DOM
+      cards.append(card);
+    });
+  }
+}
 
 // my data
 var allUnits = {
@@ -273,39 +381,3 @@ var allUnits = {
     }
   ]
 };
-
-// Some other unrelated filters code:
-// init
-
-/**
- * Builds cards based on units data in filtered allUnits array
- * @param  {Array}  data The data array or JSON file
- */
-function renderCards(data) {
-  console.log("building and displaying cards");
-
-  var cards = $("#cards");
-
-  // first, delete all cards from the container
-  cards.empty();
-
-  // if there are no units in filtered allUnits array, display the message
-  if (data.length === 0) {
-    cards.append("<p>There are no apartments matching your search.</p>");
-  }
-
-  // Otherwise, display the cards based on filter values
-  else {
-    // Loop through each item in filtered allUnits array (our data) and create a card for each unit
-    data.forEach(function(unitData, unit) {
-      // for each item in filtered allUnits data, create a card string and fill out the info w/ data details
-      var card = `<div class="card">Card<br>
-                    Bedrooms: ${unitData.beds} <br>
-                    Guests: ${unitData.guests} <br>
-                    Checkin Date: ${unitData.date_available}</div>`;
-
-      // append a card to the DOM
-      cards.append(card);
-    });
-  }
-}

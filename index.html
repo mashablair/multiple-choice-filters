@@ -62,7 +62,8 @@
 							<label>Guests</label>
 							<div class="form-box">
 								<div class="dropdown dropdown-custom">
-									<button class="dropdown-toggle" type="button" id="menu1" data-toggle="dropdown"> Guest
+									<button class="dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">
+										<span id="guest_label">Guests (1)</span>
 										<span class="caret"></span></button>
 									<div id="guest_filter" class="dropdown-menu w-210" role="menu" aria-labelledby="menu1" data-guests="1">
 
@@ -73,18 +74,19 @@
 											<div class="col-sm-8">
 												<div class="count-container">
 													<div class="remove">
-														<button class="btn btn-outline-secondary" type="button"> - </button>
+														<button class="btn btn-outline-secondary decrement-btn change-value-btns" type="button"> - </button>
 													</div>
 													<input type="number" name="filter-guests" id="guest_filter_num" class="count filter" value="1" min="0" data-filter-name="guests" data-compare=">" value="1">
 													<div class="add">
-														<button class="btn btn-outline-secondary" type="button"> + </button>
+														<button class="btn btn-outline-secondary increment-btn change-value-btns" type="button"> + </button>
 													</div>
 												</div>
 											</div>
 										</div>
 
 										<div class="w-100 mt-20">
-											<button class="btn btn-link pull-right filter-close">Close</button>
+											<button class="btn btn-link pull-left filter-clear">Clear</button>
+											<button class="btn btn-link pull-right filter-close">Done</button>
 										</div>
 									</div>
 								</div>
@@ -101,12 +103,6 @@
 									<button class="dropdown-toggle " type="button" id="menu1" data-toggle="dropdown"> Any
 										<span class="caret"></span></button>
 									<ul class="dropdown-menu" role="menu" aria-labelledby="menu1" id="beds_filter">
-										<!-- <li>
-											<label class="custom-checkbox checkbox-container">Any
-												<input type="checkbox" id="beds_default">
-												<span class="checkmark"></span>
-											</label>
-										</li> -->
 										<li>
 											<label class="custom-checkbox checkbox-container">Studio
 												<input type="checkbox" checked="checked" class="beds-filter" data-filter-name="beds" data-compare="contains" value="0">
@@ -133,7 +129,8 @@
 										</li>
 										<li>
 											<div class="w-100 mt-20">
-												<button class="btn btn-link pull-right filter-close">Close</button>
+												<button class="btn btn-link pull-left filter-clear">Clear</button>
+												<button class="btn btn-link pull-right filter-close">Done</button>
 											</div>
 										</li>
 									</ul>
