@@ -9,7 +9,7 @@ var filterCards = (function() {
     allBedsInputs = document.querySelectorAll("#beds_filter .beds-filter"),
     bedsLabel = document.getElementById("beds_label");
 
-  // Get all filters
+  // Get all 1-value filters (exclude multiple-choice Bedroom filters)
   var filters = Array.from(document.querySelectorAll("#filters .filter"));
   console.log("FILTERS:");
   console.log(filters);
