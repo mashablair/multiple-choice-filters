@@ -4,18 +4,36 @@ var filterCards = (function() {
 
   // Get all filters
   var filters = Array.from(document.querySelectorAll("#filters .filter"));
-  console.log("FILTERS");
+  console.log("FILTERS:");
   console.log(filters);
 
   // Listen for changes to any filter
   document.querySelector("#filters").addEventListener(
     "input",
     function(event) {
+      // if date input field, return b/c we want to wait for 'blur' event
+      if (event.target.matches(".date-pickers")) return;
+
       console.log("filter is clicked");
       console.log(event.target);
+      runFilters();
+    },
+    false
+  );
 
-      // if (!event.target.matches(".filter")) return;
+  // CheckIn Date filter event listener (wait until date is finalized)
+  document.querySelector("#FtxtMoveInDate").addEventListener(
+    "blur",
+    function(event) {
+      console.log("date input filed is clicked");
+      console.log(event.target);
 
+      // if date input field, return b/c we want to wait for 'blur' event
+      if (!event.target.matches("#FtxtMoveInDate")) return;
+
+      if (event.target.value === "" || !event.target.value) return;
+      // var filterDate = new Date(event.target.value).getTime();
+      // event.target.setAttribute('data-value', filterDate)
       runFilters();
     },
     false
@@ -41,13 +59,18 @@ var filterCards = (function() {
     var criteriaBeds = { name: "beds", compare: "contains", val: activeBeds };
 
     // Then loop through the rest of single-value filters to create an array of criteria objects
-    var criteriaArray = filters.map(function(filter) {
-      return {
-        name: filter.getAttribute("data-filter-name"),
-        compare: filter.getAttribute("data-compare"),
-        val: filter.getAttribute("data-value") ? filter.getAttribute("data-value") : filter.value
-      };
-    });
+    var criteriaArray = filters
+      // this will remove date filter, if empty
+      .filter(function(item) {
+        return item.value !== "";
+      })
+      .map(function(filter) {
+        return {
+          name: filter.getAttribute("data-filter-name"),
+          compare: filter.getAttribute("data-compare"),
+          val: filter.getAttribute("data-value") ? filter.getAttribute("data-value") : filter.value
+        };
+      });
 
     // combine the result to create a final criteria array
     criteriaArray.push(criteriaBeds);
@@ -76,8 +99,17 @@ var filterCards = (function() {
       var matchingCriteriaArray = criteria.filter(function(condition) {
         // Depending on the comparison required, we'll check if the unit matches in a few different ways
         if (condition.compare === "<") {
-          return unit[condition.name] < condition.val;
+          // if date
+          if (condition.name === "date_available") {
+            var filterDate = new Date(condition.val).getTime();
+            var unitDate = new Date(unit.date_available).getTime();
+
+            return unitDate <= filterDate;
+          } else {
+            return unit[condition.name] < condition.val;
+          }
         } else if (condition.compare === ">") {
+          // it's guests
           return unit[condition.name] >= condition.val;
         } else if (condition.compare === "=") {
           return unit[condition.name] == condition.val;
@@ -91,7 +123,7 @@ var filterCards = (function() {
 
       console.log(matchingCriteriaArray); // e.g. [{...}, {...}]
 
-      // Compare the matching matchingCriteriaArray length to the criteria length
+      // Compare the matchingCriteriaArray length to the criteria length
       // If they're the same, the unit matches all criteria
       // If not, it fails
       console.log(matchingCriteriaArray.length === criteria.length);
@@ -198,7 +230,7 @@ var allUnits = {
       floorplan_id: 15002002,
       floorplan_name: "Urbano",
       guests: 1,
-      date_available: "08/08/2019",
+      date_available: "09/01/2019",
       photo: "images/img02.jpg",
       satisfies_filter: 0,
       has_card: 0
@@ -216,7 +248,7 @@ var allUnits = {
       floorplan_id: 15002003,
       floorplan_name: "Urbano",
       guests: 4,
-      date_available: "08/08/2019",
+      date_available: "08/30/2019",
       photo: "images/img03.jpg",
       satisfies_filter: 0,
       has_card: 0
@@ -234,7 +266,7 @@ var allUnits = {
       floorplan_id: 15002001,
       floorplan_name: "Metropolitan",
       guests: 4,
-      date_available: "08/08/2019",
+      date_available: "08/29/2019",
       photo: "images/img01.jpg",
       satisfies_filter: 0,
       has_card: 0
@@ -267,7 +299,10 @@ function renderCards(data) {
     // Loop through each item in filtered allUnits array (our data) and create a card for each unit
     data.forEach(function(unitData, unit) {
       // for each item in filtered allUnits data, create a card string and fill out the info w/ data details
-      var card = `<div class="card">Card<br>Bedrooms: ${unitData.beds} <br>Guests: ${unitData.guests}</div>`;
+      var card = `<div class="card">Card<br>
+                    Bedrooms: ${unitData.beds} <br>
+                    Guests: ${unitData.guests} <br>
+                    Checkin Date: ${unitData.date_available}</div>`;
 
       // append a card to the DOM
       cards.append(card);
