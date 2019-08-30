@@ -4,7 +4,10 @@ var filterCards = (function() {
 
   var guestFilter = document.getElementById("guest_filter"),
     guestFilterInput = document.getElementById("guest_filter_num"),
-    guestLabel = document.getElementById("guest_label");
+    guestLabel = document.getElementById("guest_label"),
+    bedsFilter = document.getElementById("beds_filter"),
+    allBedsInputs = document.querySelectorAll("#beds_filter .beds-filter"),
+    bedsLabel = document.getElementById("beds_label");
 
   // Get all filters
   var filters = Array.from(document.querySelectorAll("#filters .filter"));
@@ -58,7 +61,7 @@ var filterCards = (function() {
       // depending what button is clicked
       // if Done btn, just close & return
       if (event.target.classList.contains("filter-close")) {
-        this.parentNode.classList.remove("open");
+        this.closest(".dropdown").classList.remove("open");
 
         // if any btns that require filters running
       } else {
@@ -88,10 +91,11 @@ var filterCards = (function() {
           // if Clear btn, reset input to 1 (default)
         } else if (event.target.classList.contains("filter-clear")) {
           guestFilterInput.value = 1;
+          guestNum = 1;
         }
 
         // update label & run filters
-        guestLabel.textContent = `Guests (${guestNum})`;
+        guestLabel.textContent = `${guestNum} Guest${guestNum > 1 ? "s" : ""}`;
         runFilters();
       }
     },
@@ -106,66 +110,81 @@ var filterCards = (function() {
   };
 
   // Bedroom filters (checkboxes) event listener
-  document.querySelector("#beds_filter").addEventListener(
+  bedsFilter.addEventListener(
     "input",
     function(event) {
       console.log("Bedrooms filter is clicked");
       console.log(event.target);
+
+      // update label
+      var activeBeds = [];
+      // loop through every checkbox and create values array for all checked boxes
+      Array.prototype.forEach.call(allBedsInputs, function(elem, i) {
+        if (elem.checked) {
+          activeBeds.push(parseInt(elem.value));
+        }
+      });
+
+      // if no checked boxes or all checked, display 'Any'
+      if (activeBeds.length === 0 || activeBeds.length === allBedsInputs.length) {
+        bedsLabel.textContent = "Any";
+      }
+
+      // else, get number values from array and create strings for label
+      else {
+        activeBeds = activeBeds.map(function(bed) {
+          if (bed == 0) {
+            return "Studio";
+          } else if (bed == 1) {
+            return "1 Bed";
+          } else if (bed > 1) {
+            return bed + " Beds";
+          } else {
+            return "";
+          }
+        });
+
+        // turn array into a string and insert into label
+        bedsLabel.textContent = activeBeds.join(", ");
+      }
+
       runFilters();
     },
     false
   );
 
-  // // Bedroom filters event listener for buttons
-  // guestFilter.addEventListener(
-  //   "click",
-  //   function() {
-  //     console.log("Guest filter button is clicked");
+  // Bedroom filters event listener for buttons
+  bedsFilter.addEventListener(
+    "click",
+    function(e) {
+      console.log("Bedrooms filter button is clicked");
+      console.log(event.target);
 
-  //     console.log(event.target);
+      // to prevent dropdowns from closing on button clicks
+      e.stopPropagation();
 
-  //     // sanity check if not a button was clicked
-  //     if (!event.target.matches("button")) return;
+      // sanity check if not a button was clicked
+      if (!event.target.matches("button")) return;
 
-  //     var guestNum = parseInt(guestFilterInput.value);
+      // depending what button is clicked
+      // if Done btn, just close & return
+      if (event.target.classList.contains("filter-close")) {
+        this.closest(".dropdown").classList.remove("open");
 
-  //     // depending what button is clicked
-  //     // if Done btn, just close & return
-  //     if (event.target.classList.contains("filter-close")) {
-  //       this.parentNode.classList.remove("open");
-  //     }
+        // if any btns that require filters running
+      } else if (event.target.classList.contains("filter-clear")) {
+        // loop through every checkbox and uncheck all
+        Array.prototype.forEach.call(allBedsInputs, function(elem, i) {
+          elem.checked = false;
+        });
 
-  //     // if Minus btn
-  //     else if (event.target.classList.contains("decrement-btn")) {
-  //       console.log("Minus btn is clicked");
-  //       if (isNaN(guestNum)) {
-  //         guestNum = 2;
-  //       }
-  //       if (guestNum > 1) {
-  //         guestNum -= 1;
-  //         guestFilterInput.value = guestNum;
-  //       }
-  //       runFilters();
-
-  //       // if Plus btn
-  //     } else if (event.target.classList.contains("increment-btn")) {
-  //       console.log("Plus btn is clicked");
-  //       if (isNaN(guestNum)) {
-  //         guestNum = 0;
-  //       }
-
-  //       guestNum += 1;
-  //       guestFilterInput.value = guestNum;
-  //       runFilters();
-
-  //       // if Clear btn, reset input to 1 (default)
-  //     } else if (event.target.classList.contains("filter-clear")) {
-  //       guestFilterInput.value = 1;
-  //       runFilters();
-  //     }
-  //   },
-  //   false
-  // );
+        // update label & run filters
+        bedsLabel.textContent = "Any";
+        runFilters();
+      }
+    },
+    false
+  );
 
   /** Checks multiple-choice checkboxes filters, then checks all other filters,
    *  combines the result and creates criteriaArray.
@@ -173,21 +192,25 @@ var filterCards = (function() {
    *  Passes the result of filtered units array into renderCard() function
    */
   function runFilters() {
+    var criteriaArray = [];
+
     // handle MULTIPLE-CHOICE beds filter first
     var activeBeds = [];
     // loop through every checkbox and create values array for all checked boxes
-    var allBedsInputs = document.querySelectorAll("#beds_filter .beds-filter");
     Array.prototype.forEach.call(allBedsInputs, function(elem, i) {
       if (elem.checked) {
         activeBeds.push(parseInt(elem.value));
       }
     });
 
-    // add this array of values in beds criteria object
-    var criteriaBeds = { name: "beds", compare: "contains", val: activeBeds };
+    // if all checkboxes or none are checked, don't add as criteria, b/c it means 'Any'
+    if (activeBeds.length > 0 && activeBeds.length < allBedsInputs.length) {
+      // add this array of values in beds criteria object
+      criteriaArray.push({ name: "beds", compare: "contains", val: activeBeds });
+    }
 
     // Then loop through the rest of single-value filters to create an array of criteria objects
-    var criteriaArray = filters
+    var otherFiltersCriteriaArray = filters
       // this will remove date filter, if empty
       .filter(function(item) {
         return item.value !== "";
@@ -200,8 +223,8 @@ var filterCards = (function() {
         };
       });
 
-    // combine the result to create a final criteria array
-    criteriaArray.push(criteriaBeds);
+    // combine the result to create a final criteria array (use spread operator to merge arrays)
+    criteriaArray.push(...otherFiltersCriteriaArray);
 
     console.log("Final CRITERIA:");
     console.log(criteriaArray);
@@ -258,13 +281,17 @@ var filterCards = (function() {
       return matchingCriteriaArray.length === criteria.length;
     });
   };
-})();
 
-// Some other unrelated filters code:
-// init
-$(document).ready(function() {
-  renderCards(allUnits.units);
-});
+  // Some other unrelated filters code:
+  // init
+  $(document).ready(function() {
+    renderCards(allUnits.units);
+
+    // check Guests label
+    var guestNum = guestFilterInput.value;
+    guestLabel.textContent = `${guestNum} Guest${guestNum > 1 ? "s" : ""}`;
+  });
+})();
 
 /**
  * Builds cards based on units data in filtered allUnits array
